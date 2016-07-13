@@ -1,0 +1,13 @@
+{
+  "name": "checkerz",
+  "version": "1.0.3",
+  "scripts": {
+    "dev": "DB=checkerz-dev-db LEVEL=silly PORT=3333 nodemon dst/server.js"
+  },
+  "author": "Alex and Evan",
+  "license": "MIT",
+  "devDependencies": {
+  },
+  "dependencies": {
+  }
+}
