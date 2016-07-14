@@ -53,13 +53,172 @@ describe('Game', () => {
     it('should successfully move a piece', sinon.test(function (done) {
       this.stub(game, 'save').yields(null, {});
       game.generatePieces(() => {
-        game.movePiece(game.player1Pieces[10], 5, 5, () => {
+        game.movePiece(game.player1Pieces[10], 6, 3, () => {
           expect(game.save.getCall(1).thisValue.turn).to.equal(2);
-          expect(game.save.getCall(1).thisValue.player1Pieces[10].x).to.equal(5);
-          expect(game.save.getCall(1).thisValue.player1Pieces[10].y).to.equal(5);
+          expect(game.save.getCall(1).thisValue.player1Pieces[10].x).to.equal(6);
+          expect(game.save.getCall(1).thisValue.player1Pieces[10].y).to.equal(3);
           done();
         });
       });
     }));
+    it('should not move a piece - out of bounds', done => {
+      game.generatePieces(() => {
+        game.movePiece(game.player1Pieces[10], 10, 5, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[10].x).to.equal(5);
+          expect(game.player1Pieces[10].y).to.equal(2);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - out of bounds', done => {
+      game.generatePieces(() => {
+        game.movePiece(game.player1Pieces[10], -10, 5, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[10].x).to.equal(5);
+          expect(game.player1Pieces[10].y).to.equal(2);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - out of bounds', done => {
+      game.generatePieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[10], 1, -15, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player2Pieces[10].x).to.equal(2);
+          expect(game.player2Pieces[10].y).to.equal(5);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - out of bounds', done => {
+      game.generatePieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[10], 1, 15, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player2Pieces[10].x).to.equal(2);
+          expect(game.player2Pieces[10].y).to.equal(5);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - location already occupied', done => {
+      game.generatePieces(() => {
+        game.movePiece(game.player1Pieces[6], 3, 2, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[6].x).to.equal(4);
+          expect(game.player1Pieces[6].y).to.equal(1);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - vertical move one space, player 1', done => {
+      game.generatePieces(() => {
+        game.movePiece(game.player1Pieces[8], 1, 3, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[8].x).to.equal(1);
+          expect(game.player1Pieces[8].y).to.equal(2);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - horizontal move one space, player 1', done => {
+      game.generatePieces(() => {
+        game.movePiece(game.player1Pieces[8], 2, 2, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[8].x).to.equal(1);
+          expect(game.player1Pieces[8].y).to.equal(2);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - vertical move one space, player 2', done => {
+      game.generatePieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[8], 6, 4, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player2Pieces[8].x).to.equal(6);
+          expect(game.player2Pieces[8].y).to.equal(5);
+          done();
+        });
+      });
+    });
+    it('should not move a piece - horizontal move one space, player 2', done => {
+      game.generatePieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[8], 5, 5, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player2Pieces[8].x).to.equal(6);
+          expect(game.player2Pieces[8].y).to.equal(5);
+          done();
+        });
+      });
+    });
+    it('should move a king piece backwards, player 2', done => {
+      game.generatePieces(() => {
+        game.player2Pieces[8].isKing = true;
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[8], 7, 4, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[8].x).to.equal(7);
+          expect(game.player2Pieces[8].y).to.equal(4);
+          game.turn = 2;
+          game.movePiece(game.player2Pieces[8], 6, 5, () => {
+            expect(game.turn).to.equal(1);
+            expect(game.player2Pieces[8].x).to.equal(6);
+            expect(game.player2Pieces[8].y).to.equal(5);
+            done();
+          });
+        });
+      });
+    });
+    it('should move a king piece backwards, player 1', done => {
+      game.generatePieces(() => {
+        game.player1Pieces[8].isKing = true;
+        game.movePiece(game.player1Pieces[8], 2, 3, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[8].x).to.equal(2);
+          expect(game.player1Pieces[8].y).to.equal(3);
+          game.turn = 1;
+          game.movePiece(game.player1Pieces[8], 1, 2, () => {
+            expect(game.turn).to.equal(2);
+            expect(game.player1Pieces[8].x).to.equal(1);
+            expect(game.player1Pieces[8].y).to.equal(2);
+            done();
+          });
+        });
+      });
+    });
+    it('should king a piece when it reaches the other side, player 1', done => {
+      game.generatePieces(() => {
+        game.player2Pieces.splice(2, 1);
+        game.player2Pieces.splice(6, 1);
+        game.player1Pieces[0].x = 3;
+        game.player1Pieces[0].y = 6;
+        game.movePiece(game.player1Pieces[0], 2, 7, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[0].x).to.equal(2);
+          expect(game.player1Pieces[0].y).to.equal(7);
+          expect(game.player1Pieces[0].isKing).to.equal(true);
+          done();
+        });
+      });
+    });
+    it('should king a piece when it reaches the other side, player 2', done => {
+      game.generatePieces(() => {
+        game.player1Pieces.splice(2, 1);
+        game.player1Pieces.splice(6, 1);
+        game.player2Pieces[0].x = 4;
+        game.player2Pieces[0].y = 1;
+        game.movePiece(game.player2Pieces[0], 5, 0, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[0].x).to.equal(5);
+          expect(game.player2Pieces[0].y).to.equal(0);
+          expect(game.player2Pieces[0].isKing).to.equal(true);
+          done();
+        });
+      });
+    });
   });
 });

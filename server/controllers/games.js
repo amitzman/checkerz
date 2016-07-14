@@ -3,6 +3,7 @@
 import express from 'express';
 import Game from '../models/game';
 import bodyValidator from '../validators/games/body';
+import moveBodyValidator from '../validators/games/moveBody';
 const router = module.exports = express.Router();
 
 router.post('/', bodyValidator, (req, res) => {
@@ -13,27 +14,15 @@ router.post('/', bodyValidator, (req, res) => {
   });
 });
 
-router.put('/:id/move', (req, res) => {
+router.put('/:id/move', moveBodyValidator, (req, res) => {
   Game.findById(req.params.id, (err, game) => {
-    if (req.body.piece.player === 1) {
-      game.player1Pieces = updatePiece(game.player1Pieces, req.body.piece, req.body.targetX, req.body.targetY);
-      game.turn = 2;
-    } else {
-      game.player2Pieces = updatePiece(game.player2Pieces, req.body.piece, req.body.targetX, req.body.targetY);
-      game.turn = 1;
-    }
-    game.save(() => {
-      res.send({ game });
+    // console.log('*****res.locals', res.locals);
+    game.movePiece(res.locals.piece, res.locals.targetX, res.locals.targetY, (results) => {
+      if (results.error) {
+        res.status(400).send({ messages: results.error });
+      } else {
+        res.send({ game: results });
+      }
     });
   });
 });
-
-const updatePiece = function (piecesArray, pieceToBeMoved, targetX, targetY) {
-  return piecesArray.map(function (piece) {
-    if (piece.x === pieceToBeMoved.x && piece.y === pieceToBeMoved.y) {
-      piece.x = targetX;
-      piece.y = targetY;
-    }
-    return piece;
-  });
-};

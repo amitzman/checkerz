@@ -120,13 +120,182 @@ describe('games', () => {
         .put(`/games/${game._id}/move`)
         .send({
           piece: game.player1Pieces[10],
-          targetX: 5,
+          targetX: 6,
+          targetY: 3,
+        })
+        .end((err, rsp) => {
+          expect(rsp.status).to.equal(200);
+          expect(rsp.body.game.turn).to.equal(2);
+          expect(rsp.body.game.player1Pieces[10].x).to.equal(6);
+          expect(rsp.body.game.player1Pieces[10].y).to.equal(3);
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - out of bounds', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: 8,
           targetY: 5,
         })
         .end((err, rsp) => {
-          expect(rsp.body.game.turn).to.equal(2);
-          expect(rsp.body.game.player1Pieces[10].x).to.equal(5);
-          expect(rsp.body.game.player1Pieces[10].y).to.equal(5);
+          expect(err).to.be.null;
+          expect(rsp.body.messages[0]).to.equal('"targetX" must be less than or equal to 7');
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - out of bounds', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: -2,
+          targetY: 5,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.body.messages[0]).to.equal('"targetX" must be larger than or equal to 0');
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - out of bounds', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: 5,
+          targetY: 9,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.body.messages[0]).to.equal('"targetY" must be less than or equal to 7');
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - out of bounds', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: 5,
+          targetY: -2,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.body.messages[0]).to.equal('"targetY" must be larger than or equal to 0');
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - piece is currently in that spot', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[6],
+          targetX: 3,
+          targetY: 2,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.status).to.equal(400);
+          expect(rsp.body.messages).to.equal('Location already occupied');
+          done();
+        });
+      });
+    });
+    it('should NOT move a piece - invalid move 2 spaces vertically', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: 5,
+          targetY: 4,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.status).to.equal(400);
+          expect(rsp.body.messages).to.equal('Invalid Move');
+          done();
+        });
+      });
+    });
+    it('should king a piece when it reaches the opposite side - player1', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generateTestKingPieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[0],
+          targetX: 3,
+          targetY: 7,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.status).to.equal(200);
+          expect(rsp.body.game.player1Pieces[0].isKing).to.equal(true);
+          expect(rsp.body.game.player1Pieces[0].x).to.equal(3);
+          expect(rsp.body.game.player1Pieces[0].y).to.equal(7);
+          done();
+        });
+      });
+    });
+    it('should king a piece when it reaches the opposite side - player2', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generateTestKingPieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player2Pieces[0],
+          targetX: 0,
+          targetY: 0,
+        })
+        .end((err, rsp) => {
+          expect(err).to.be.null;
+          expect(rsp.status).to.equal(200);
+          expect(rsp.body.game.player2Pieces[0].isKing).to.equal(true);
+          expect(rsp.body.game.player2Pieces[0].x).to.equal(0);
+          expect(rsp.body.game.player2Pieces[0].y).to.equal(0);
           done();
         });
       });
