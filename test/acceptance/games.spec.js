@@ -5,6 +5,7 @@ const request = require('supertest');
 const app = require('../../dst/server');
 const cp = require('child_process');
 const User = require('../../dst/models/user');
+const Game = require('../../dst/models/game');
 
 describe('games', () => {
   let player1 = null;
@@ -32,9 +33,23 @@ describe('games', () => {
       .end((err, rsp) => {
         expect(err).to.be.null;
         expect(rsp.status).to.equal(200);
-        expect(rsp.body.game.turn).to.equal(0);
+        expect(rsp.body.game.turn).to.equal(1);
         expect(rsp.body.game.player1.toString()).to.equal('012345678901234567890001');
         expect(rsp.body.game.player2.toString()).to.equal('012345678901234567890002');
+        expect(rsp.body.game.player1Pieces).to.have.length(12);
+        expect(rsp.body.game.player1Pieces[0].x).to.equal(1);
+        expect(rsp.body.game.player1Pieces[0].y).to.equal(0);
+        expect(rsp.body.game.player1Pieces[6].x).to.equal(4);
+        expect(rsp.body.game.player1Pieces[6].y).to.equal(1);
+        expect(rsp.body.game.player1Pieces[11].x).to.equal(7);
+        expect(rsp.body.game.player1Pieces[11].y).to.equal(2);
+        expect(rsp.body.game.player2Pieces).to.have.length(12);
+        expect(rsp.body.game.player2Pieces[2].x).to.equal(2);
+        expect(rsp.body.game.player2Pieces[2].y).to.equal(7);
+        expect(rsp.body.game.player2Pieces[5].x).to.equal(5);
+        expect(rsp.body.game.player2Pieces[5].y).to.equal(6);
+        expect(rsp.body.game.player2Pieces[11].x).to.equal(0);
+        expect(rsp.body.game.player2Pieces[11].y).to.equal(5);
         done();
       });
     });
@@ -90,6 +105,30 @@ describe('games', () => {
         expect(rsp.status).to.equal(400);
         expect(rsp.body.messages).to.deep.equal(['"player2" is required']);
         done();
+      });
+    });
+  });
+
+  describe('put /games/:id/move', () => {
+    it('should move a piece', done => {
+      const game = new Game({
+        player1: '012345678901234567890001',
+        player2: '012345678901234567890002',
+      });
+      game.generatePieces(() => {
+        request(app)
+        .put(`/games/${game._id}/move`)
+        .send({
+          piece: game.player1Pieces[10],
+          targetX: 5,
+          targetY: 5,
+        })
+        .end((err, rsp) => {
+          expect(rsp.body.game.turn).to.equal(2);
+          expect(rsp.body.game.player1Pieces[10].x).to.equal(5);
+          expect(rsp.body.game.player1Pieces[10].y).to.equal(5);
+          done();
+        });
       });
     });
   });
