@@ -25,3 +25,9 @@ router.put('/:id/move', moveBodyValidator, (req, res) => {
     });
   });
 });
+
+router.get('/:id', (req, res) => {
+  Game.findById(req.params.id, (err, game) => {
+    res.send(game);
+  });
+});

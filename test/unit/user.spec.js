@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, func-names */
 
 const expect = require('chai').expect;
-const sinon = require('sinon');
 const User = require('../../dst/models/user');
 
 describe('User', () => {

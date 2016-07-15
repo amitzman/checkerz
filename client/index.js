@@ -17,5 +17,7 @@ render(
       <Route path="about" component={About} />
       <Route path="faq" component={Faq} />
     </Route>
+    <Route path="/users" />
+    <Route path="/games" />
   </Router>
   , document.getElementById('root'));

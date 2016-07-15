@@ -350,7 +350,6 @@ describe('Game', () => {
     it('should win the game after the opposing teams last piece is jumped', done => {
       game.generateTestWinningGamePieces(() => {
         game.movePiece(game.player1Pieces[0], 1, 1, (response) => {
-          console.log(response);
           expect(response.message).to.equal('Player 1 has won the game');
           expect(game.player2Pieces).to.have.length(0);
           done();

@@ -10,3 +10,9 @@ router.post('/', bodyValidator, (req, res) => {
     res.send({ user });
   });
 });
+
+router.get('/', (req, res) => {
+  User.find((err, users) => {
+    res.send({ users });
+  });
+});
