@@ -9,7 +9,8 @@ const router = module.exports = express.Router();
 router.post('/', bodyValidator, (req, res) => {
   Game.create(res.locals, (err, game) => {
     game.generatePieces(() => {
-      res.send({ game });
+      res.redirect(`/games/${game._id}`);
+      // res.send({ game });
     });
   });
 });

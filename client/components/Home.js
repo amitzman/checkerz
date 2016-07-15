@@ -8,20 +8,7 @@ class Home extends React.Component {
     super(props);
     this.state = { user: undefined, users: [] };
     this.register = this.register.bind(this);
-    this.refresh = this.refresh.bind(this);
   }
-
-  componentDidMount() {
-    this.refresh();
-  }
-
-  refresh() {
-    fetch('/users')
-    .then(r => r.json())
-    .then(j => {
-      this.setState({ users: j.users });
-    });
-}
 
   register(e) {
     const name = this.refs.register.refs.name.value;
@@ -51,7 +38,7 @@ class Home extends React.Component {
           <Register ref="register" user={this.state.user} register={this.register} />
         </div>
         <div className="col-xs-6">
-          <StartGame users={this.state.users} refresh={this.refresh}/>
+          <a href='/games'><img className="img img-responsive" src="http://24.media.tumblr.com/af53e613ec8077d5ba112a6707169496/tumblr_mwyfa9D9Ex1sq540vo1_500.gif" /></a>
         </div>
       </div>
     );

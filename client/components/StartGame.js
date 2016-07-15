@@ -11,20 +11,20 @@ class StartGame extends React.Component {
     return (
       <div>
         <h1>Start Game</h1>
-        <form>
+        <form method='post' action='/games'>
           <div className='form-group'>
             <label>Player 1:</label>
-            <select className='form-control' ref='user'>
-              {this.props.users.map((user, index) => <option key={index}>{user.name}</option>)}
+            <select name='player1' className='form-control' ref='user'>
+              {this.props.users.map((user, index) => <option value={user._id} key={index}>{user.name}</option>)}
             </select>
           </div>
           <div className='form-group'>
             <label>Player 2:</label>
-            <select className='form-control' ref='user'>
-              {this.props.users.map((user, index) => <option key={index}>{user.name}</option>)}
+            <select name='player2' className='form-control' ref='user'>
+              {this.props.users.map((user, index) => <option value={user._id} key={index}>{user.name}</option>)}
             </select>
           </div>
-          <button className='btn btn-primary'>Start Game</button>
+          <button type='submit' className='btn btn-primary'>Start Game</button>
         </form>
       </div>
     );

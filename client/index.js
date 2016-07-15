@@ -2,6 +2,7 @@ import App from './components/App';
 import Home from './components/Home';
 import About from './components/About';
 import Faq from './components/Faq';
+import Game from './components/Game';
 
 import React from 'react';
 import { render } from 'react-dom';
@@ -17,7 +18,6 @@ render(
       <Route path="about" component={About} />
       <Route path="faq" component={Faq} />
     </Route>
-    <Route path="/users" />
-    <Route path="/games" />
+    <Route path="/games" component={Game} />
   </Router>
   , document.getElementById('root'));
