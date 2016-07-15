@@ -220,5 +220,142 @@ describe('Game', () => {
         });
       });
     });
+    it('should succesfully jump an opponents piece, player 1, down-right jump', done => {
+      game.generateTestJumpPieces(() => {
+        game.movePiece(game.player1Pieces[0], 5, 5, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[0].x).to.equal(5);
+          expect(game.player1Pieces[0].y).to.equal(5);
+          expect(game.player2Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('should succesfully jump an opponents piece, player 2, up-left jump', done => {
+      game.generateTestJumpPieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[0], 2, 2, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[0].x).to.equal(2);
+          expect(game.player2Pieces[0].y).to.equal(2);
+          expect(game.player1Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('should succesfully jump an opponents piece, player 2, up-right jump', done => {
+      game.generateTestJumpPieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[1], 4, 2, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[1].x).to.equal(4);
+          expect(game.player2Pieces[1].y).to.equal(2);
+          expect(game.player1Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('should succesfully jump an opponents piece, player 1, down-left jump', done => {
+      game.generateTestJumpPieces(() => {
+        game.movePiece(game.player1Pieces[0], 1, 5, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[0].x).to.equal(1);
+          expect(game.player1Pieces[0].y).to.equal(5);
+          expect(game.player2Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('king should succesfully jump an opponents piece, player 2, down-right jump', done => {
+      game.generateTestJumpKingPieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[1], 4, 4, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[1].x).to.equal(4);
+          expect(game.player2Pieces[1].y).to.equal(4);
+          expect(game.player1Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('king should succesfully jump an opponents piece, player 1, up-left jump', done => {
+      game.generateTestJumpKingPieces(() => {
+        game.movePiece(game.player1Pieces[0], 1, 1, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[0].x).to.equal(1);
+          expect(game.player1Pieces[0].y).to.equal(1);
+          expect(game.player2Pieces).to.have.length(2);
+          done();
+        });
+      });
+    });
+    it('king should succesfully jump an opponents piece, player 1, up-right jump', done => {
+      game.generateTestJumpKingPieces(() => {
+        game.movePiece(game.player1Pieces[0], 5, 1, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player1Pieces[0].x).to.equal(5);
+          expect(game.player1Pieces[0].y).to.equal(1);
+          expect(game.player2Pieces).to.have.length(2);
+          done();
+        });
+      });
+    });
+    it('king should succesfully jump an opponents piece, player 2, down-left jump', done => {
+      game.generateTestJumpKingPieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[0], 2, 4, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player2Pieces[0].x).to.equal(2);
+          expect(game.player2Pieces[0].y).to.equal(4);
+          expect(game.player1Pieces).to.have.length(1);
+          done();
+        });
+      });
+    });
+    it('should NOT jump a piece -- being blocked', done => {
+      game.generateTestBadJumpPieces(() => {
+        game.movePiece(game.player1Pieces[0], 1, 1, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[0].x).to.equal(3);
+          expect(game.player1Pieces[0].y).to.equal(3);
+          expect(game.player2Pieces).to.have.length(2);
+          done();
+        });
+      });
+    });
+    it('should NOT jump a piece -- no piece to be jumped', done => {
+      game.generateTestBadJumpPieces(() => {
+        game.movePiece(game.player1Pieces[0], 5, 1, () => {
+          expect(game.turn).to.equal(1);
+          expect(game.player1Pieces[0].x).to.equal(3);
+          expect(game.player1Pieces[0].y).to.equal(3);
+          expect(game.player2Pieces).to.have.length(2);
+          done();
+        });
+      });
+    });
+    it('should NOT jump a piece -- jumping same team piece', done => {
+      game.generateTestBadJumpPieces(() => {
+        game.turn = 2;
+        game.movePiece(game.player2Pieces[0], 0, 0, () => {
+          expect(game.turn).to.equal(2);
+          expect(game.player2Pieces[0].x).to.equal(2);
+          expect(game.player2Pieces[0].y).to.equal(2);
+          expect(game.player1Pieces).to.have.length(1);
+          expect(game.player2Pieces).to.have.length(2);
+          done();
+        });
+      });
+    });
+    it('should win the game after the opposing teams last piece is jumped', done => {
+      game.generateTestWinningGamePieces(() => {
+        game.movePiece(game.player1Pieces[0], 1, 1, (response) => {
+          console.log(response);
+          expect(response.message).to.equal('Player 1 has won the game');
+          expect(game.player2Pieces).to.have.length(0);
+          done();
+        });
+      });
+    });
   });
 });

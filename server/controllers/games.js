@@ -16,7 +16,6 @@ router.post('/', bodyValidator, (req, res) => {
 
 router.put('/:id/move', moveBodyValidator, (req, res) => {
   Game.findById(req.params.id, (err, game) => {
-    // console.log('*****res.locals', res.locals);
     game.movePiece(res.locals.piece, res.locals.targetX, res.locals.targetY, (results) => {
       if (results.error) {
         res.status(400).send({ messages: results.error });

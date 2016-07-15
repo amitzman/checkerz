@@ -1,4 +1,4 @@
-/* eslint-disable no-use-before-define, prefer-arrow-callback, func-names, no-param-reassign, brace-style, consistent-return, max-len */
+/* eslint-disable no-use-before-define, arrow-body-style, no-else-return, prefer-arrow-callback, func-names, no-param-reassign, brace-style, consistent-return, max-len */
 
 import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
@@ -27,20 +27,11 @@ schema.methods.generatePieces = function (cb) {
   });
 };
 
-schema.methods.generateTestKingPieces = function (cb) {
-  this.player1Pieces.push(new Piece(4, 6, 1));
-  this.player2Pieces.push(new Piece(1, 1, 2));
-  this.player1Pieces.push(new Piece(3, 3, 1));
-  this.player1Pieces[1].isKing = true;
-  this.save(() => {
-    cb();
-  });
-};
-
 schema.methods.movePiece = function (piece, targetX, targetY, cb) {
   if (isOutOfBounds(targetX, targetY)) { return cb({ error: 'Move Out of Bounds' }); }
   if (isOccupied(targetX, targetY, this)) { return cb({ error: 'Location already occupied' }); }
-  if (isInvalidMove(piece, targetX, targetY)) { return cb({ error: 'Invalid Move' }); }
+  const jumpedPiece = isValidJump(piece, targetX, targetY, this);
+  if (!jumpedPiece && isInvalidMove(piece, targetX, targetY)) { return cb({ error: 'Invalid Move' }); }
   if (piece.player === 1) {
     this.player1Pieces = updatePiece(this.player1Pieces, piece, targetX, targetY);
     this.turn = 2;
@@ -49,8 +40,76 @@ schema.methods.movePiece = function (piece, targetX, targetY, cb) {
     this.turn = 1;
   }
 
+  if (this.player1Pieces.length === 0) {
+    this.save(() => {
+      return cb({ message: 'Player 2 has won the game' });
+    });
+  }
+  if (this.player2Pieces.length === 0) {
+    this.save(() => {
+      return cb({ message: 'Player 1 has won the game' });
+    });
+  }
+
   this.save(() => {
-    cb(this);
+    cb(this, jumpedPiece);
+  });
+};
+
+schema.methods.generateTestKingPieces = function (cb) {
+  this.player1Pieces.push(new Piece(4, 6, 1));
+  this.player2Pieces.push(new Piece(1, 1, 2));
+  this.player1Pieces.push(new Piece(3, 3, 1));
+  this.player2Pieces.push(new Piece(7, 7, 2));
+  this.player1Pieces[1].isKing = true;
+  this.save(() => {
+    cb();
+  });
+};
+
+schema.methods.generateTestJumpPieces = function (cb) {
+  this.player1Pieces.push(new Piece(3, 3, 1));
+  this.player2Pieces.push(new Piece(4, 4, 2));
+  this.player2Pieces.push(new Piece(2, 4, 2));
+  this.player1Pieces.push(new Piece(7, 7, 1));
+  this.save(() => {
+    cb();
+  });
+};
+
+schema.methods.generateTestJumpKingPieces = function (cb) {
+  this.player1Pieces.push(new Piece(3, 3, 1));
+  this.player1Pieces.push(new Piece(2, 5, 1));
+  this.player2Pieces.push(new Piece(4, 2, 2));
+  this.player2Pieces.push(new Piece(2, 2, 2));
+  this.player2Pieces.push(new Piece(1, 6, 2));
+  this.player1Pieces.forEach(piece => {
+    piece.isKing = true;
+  });
+  this.player2Pieces.forEach(piece => {
+    piece.isKing = true;
+  });
+  this.save(() => {
+    cb();
+  });
+};
+
+schema.methods.generateTestBadJumpPieces = function (cb) {
+  this.player1Pieces.push(new Piece(3, 3, 1));
+  this.player1Pieces[0].isKing = true;
+  this.player2Pieces.push(new Piece(2, 2, 2));
+  this.player2Pieces.push(new Piece(1, 1, 2));
+  this.save(() => {
+    cb();
+  });
+};
+
+schema.methods.generateTestWinningGamePieces = function (cb) {
+  this.player1Pieces.push(new Piece(3, 3, 1));
+  this.player1Pieces[0].isKing = true;
+  this.player2Pieces.push(new Piece(2, 2, 2));
+  this.save(() => {
+    cb();
   });
 };
 
@@ -67,6 +126,82 @@ const updatePiece = function (currentTeamPieces, pieceToBeMoved, targetX, target
     }
     return piece;
   });
+};
+
+const isValidJump = function (piece, targetX, targetY, game) {
+  if (targetX === piece.x + 2) {
+    if (piece.isKing && (targetY === piece.y + 2)) {
+      if (piece.player === 1) {
+        return getPlayer2JumpedPiece(targetX - 1, targetY - 1, game);
+      } else {
+        return getPlayer1JumpedPiece(targetX - 1, targetY - 1, game);
+      }
+    } else if (piece.isKing && (targetY === piece.y - 2)) {
+      if (piece.player === 1) {
+        return getPlayer2JumpedPiece(targetX - 1, targetY + 1, game);
+      } else {
+        return getPlayer1JumpedPiece(targetX - 1, targetY + 1, game);
+      }
+    } else if (piece.player === 1) {
+      if (targetY === piece.y + 2) {
+        return getPlayer2JumpedPiece(targetX - 1, targetY - 1, game);
+      }
+    } else {
+      if (targetY === piece.y - 2) {
+        return getPlayer1JumpedPiece(targetX - 1, targetY + 1, game);
+      }
+    }
+  } else if (targetX === piece.x - 2) {
+    if (piece.isKing && (targetY === piece.y + 2)) {
+      if (piece.player === 1) {
+        return getPlayer2JumpedPiece(targetX + 1, targetY - 1, game);
+      } else {
+        return getPlayer1JumpedPiece(targetX + 1, targetY - 1, game);
+      }
+    } else if (piece.isKing && (targetY === piece.y - 2)) {
+      if (piece.player === 1) {
+        return getPlayer2JumpedPiece(targetX + 1, targetY + 1, game);
+      } else {
+        return getPlayer1JumpedPiece(targetX + 1, targetY + 1, game);
+      }
+    } else if (piece.player === 1) {
+      if (targetY === piece.y + 2) {
+        return getPlayer2JumpedPiece(targetX + 1, targetY - 1, game);
+      }
+    } else {
+      if (targetY === piece.y - 2) {
+        return getPlayer1JumpedPiece(targetX + 1, targetY + 1, game);
+      }
+    }
+  }
+
+  return null;
+};
+
+const getPlayer2JumpedPiece = function (targetX, targetY, game) {
+  const jumpedPieceIndex = isOpposingPieceHere(targetX, targetY, game);
+  if (jumpedPieceIndex === -1) {
+    return null;
+  }
+  return (game.player2Pieces.splice(jumpedPieceIndex, 1))[0];
+};
+
+const getPlayer1JumpedPiece = function (targetX, targetY, game) {
+  const jumpedPieceIndex = isOpposingPieceHere(targetX, targetY, game);
+  if (jumpedPieceIndex === -1) {
+    return null;
+  }
+  return (game.player1Pieces.splice(jumpedPieceIndex, 1))[0];
+};
+
+const isOpposingPieceHere = function (targetX, targetY, game) {
+  let pieceIndex = -1;
+  if (game.turn === 1) {
+    pieceIndex = game.player2Pieces.indexOf(game.player2Pieces.find(piece => piece.x === targetX && piece.y === targetY));
+  } else {
+    pieceIndex = game.player1Pieces.indexOf(game.player1Pieces.find(piece => piece.x === targetX && piece.y === targetY));
+  }
+  return pieceIndex;
 };
 
 const isOccupied = function (targetX, targetY, game) {
